@@ -78,11 +78,11 @@ const toggleMachine = Machine(
                 on: {
                     VALIDATE: {
                         target: 'validating',
-                        actions: ['onTransition','resetContext']
+                        actions: ['onTransition']
                     },
                     RESET: {
                         target: 'idle',
-                        actions: ['onTransition']
+                        actions: ['onTransition','resetContext']
                     }
                 },
                 meta: {
@@ -116,16 +116,16 @@ const toggleMachine = Machine(
             stepEnded: (context, event, meta) => {
                 console.log('exitedState',meta.state.history.value)
             },
-            updateContext: assign((context, event) => ({
+            updateContext: assign({
                 valid: true,
-                data: event.data
-            })),
-            resetContext: assign(() => ({
+                data: (_, event) => event.data
+            }),
+            resetContext: assign({
                 valid: false,
                 data: {
                     name: null
                 }
-            }))
+            })
         },
         activities: {
             beeping: () => {
@@ -154,6 +154,19 @@ const toggleMachine = Machine(
         }
     }
 );
+
+// user
+// new, active, inactive
+
+// describe an object
+// describe its states
+// describe events that relate to the state
+// describe final (optional) and initial states
+// states can have data associated (context)
+// guards check the associated data (context)
+// activities run during a state
+// actions are one off things that happen on entry, on exit, or on transition
+// services
 
 function mergeMeta(meta) {
     return Object.keys(meta).reduce((acc, key) => {
