@@ -1,0 +1,88 @@
+{
+  "definitions": {},
+  "$schema": "",
+  "$id": "http://example.com/userDetails.json",
+  "type": "object",
+  "title": "User Details",
+  "required": [
+    "first_name",
+    "last_name",
+    "email",
+    "address1",
+    "city",
+    "state",
+    "zip"
+  ],
+  "properties": {
+    "first_name": {
+      "$id": "#/properties/first_name",
+      "type": "string",
+      "title": "First Name",
+      "input":  "text",
+      "required":  true,
+      "grid": 6
+    },
+    "last_name": {
+      "$id": "#/properties/last_name",
+      "type": "string",
+      "title": "Last Name",
+      "input":  "text",
+      "required":  true,
+      "grid": 6
+    },
+    "email": {
+      "$id": "#/properties/email",
+      "type": "string",
+      "title": "Email Address",
+      "input":  "email",
+      "format":  "email",
+      "required":  true,
+      "grid": 6
+    },
+    "phone": {
+      "$id": "#/properties/phone",
+      "type": "string",
+      "title": "Phone Number",
+      "input":  "text",
+      "grid": 6
+    },
+    "address1": {
+      "$id": "#/properties/address1",
+      "type": "string",
+      "title": "Address 1",
+      "input":  "text",
+      "required":  true
+    },
+    "address2": {
+      "$id": "#/properties/address2",
+      "type": "string",
+      "title": "Address 2",
+      "input":  "text",
+      "required":  true
+    },
+    "city": {
+      "$id": "#/properties/city",
+      "type": "string",
+      "title": "City",
+      "input":  "text",
+      "required":  true,
+      "grid": 4
+    },
+    "state": {
+      "$id": "#/properties/state",
+      "type": "string",
+      "title": "State",
+      "input":  "text",
+      "required":  true,
+      "grid": 4
+    },
+    "zip": {
+      "$id": "#/properties/zip",
+      "type": "string",
+      "title": "Zip Code",
+      "input":  "text",
+      "required":  true,
+      "grid": 4
+    }
+  }
+}

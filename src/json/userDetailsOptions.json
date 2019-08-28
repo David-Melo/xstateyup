@@ -1,0 +1,26 @@
+{
+  "errMessages": {
+    "first_name": {
+      "required": "First Name Is Required"
+    },
+    "last_name": {
+      "required": "Last Name Is Required"
+    },
+    "email": {
+      "required": "Email Is Required",
+      "format": "Not a valid email address"
+    },
+    "address1": {
+      "required": "Address Is Required"
+    },
+    "city": {
+      "required": "City Is Required"
+    },
+    "state": {
+      "required": "State Is Required"
+    },
+    "zip": {
+      "required": "Zip Code Is Required"
+    }
+  }
+}

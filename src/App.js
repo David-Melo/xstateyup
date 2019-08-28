@@ -3,6 +3,10 @@ import React, {useState} from 'react';
 import {useMachine} from '@xstate/react';
 import {Machine,assign} from 'xstate';
 import * as yup from 'yup';
+import FormComponent from "./components/Form";
+
+const userSchema = require('./json/userDetailsSchema.json');
+const userOptions= require('./json/userDetailsOptions.json');
 
 let schema = yup.object().shape({
     name: yup.string().required()
@@ -25,10 +29,14 @@ const toggleMachine = Machine(
         id: 'toggle',
         initial: 'idle',
         context: {
-            data: {
-                name: null
-            },
-            valid: false
+            details: {
+                config: {
+                    schema: userSchema,
+                    options: userOptions,
+                },
+                data: null,
+                valid: false
+            }
         },
         states: {
             idle: {
@@ -86,7 +94,7 @@ const toggleMachine = Machine(
                     }
                 },
                 meta: {
-                    id: 3
+                    id: 'details'
                 }
             },
             valid: {
@@ -184,6 +192,14 @@ function mergeMeta(meta) {
 //     );
 // };
 
+class FormStem extends React.Component {
+    render() {
+        return(
+
+        )
+    }
+}
+
 export const Toggler = () => {
 
     const [currentState, send] = useMachine(toggleMachine);
@@ -233,9 +249,13 @@ export const Toggler = () => {
     }
 
     if ( matches('invalid') ) {
+        let { config } = context[currentMeta.id];
         return (
             <div>
                 <h3>Invalid</h3>
+                <div style={{width: 450}}>
+                    <FormComponent config={config}/>
+                </div>
                 <input
                     value={form.name}
                     name="name"
@@ -264,6 +284,7 @@ function App() {
     return (
         <div className="App">
             <Toggler/>
+
         </div>
     );
 }
