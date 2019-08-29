@@ -1,16 +1,236 @@
 import React, {useState} from 'react';
-
 import {useMachine} from '@xstate/react';
-import {Machine,assign} from 'xstate';
+import {Machine,assign,send} from 'xstate';
 import * as yup from 'yup';
+import _ from 'lodash';
+
 import FormComponent from "./components/Form";
 
 const userSchema = require('./json/userDetailsSchema.json');
 const userOptions= require('./json/userDetailsOptions.json');
 
+const cardSchema = require('./json/cardDetailsSchema.json');
+const cardOptions= require('./json/cardDetailsOptions.json');
+
 let schema = yup.object().shape({
     name: yup.string().required()
 });
+
+const process = {
+    user: {
+        config: {
+            schema: userSchema,
+            options: userOptions,
+        }
+    },
+    card: {
+        config: {
+            schema: cardSchema,
+            options: cardOptions,
+        }
+    }
+};
+
+function mapProcessToContext(process) {
+    let count = 1;
+    let context = {};
+    _.forEach(process,(p,k)=>{
+        count++;
+        context[count.toString()] = {
+            ...p,
+            data: null,
+            valid: false
+        };
+    });
+    return context;
+}
+
+function mapProcessToSteps(process) {
+    let count = 1;
+    let steps = {
+        '1': {
+            entry: ['stepStarted'],
+            exit: ['stepEnded'],
+            on: {
+                NEXT: {
+                    target: '2',
+                    actions: ['onTransition']
+                },
+            },
+            meta: {
+                id: 'start'
+            }
+        }
+    };
+    _.forEach(process,(p,k)=>{
+        count++;
+        let current = count.toString();
+        let previous = (count-1).toString();
+        let next = (count+1).toString();
+        steps[current] = {
+            entry: ['stepStarted'],
+            exit: ['stepEnded'],
+            on: {
+                PREV: {
+                    target: previous,
+                    actions: ['onTransition']
+                },
+                NEXT: {
+                    target: next,
+                    actions: ['onTransition','updateContext']
+                }
+            },
+            meta: {
+                id: k
+            }
+        };
+    });
+    let final = count+1;
+    steps[final.toString()] = {
+        type: 'final',
+        entry: ['stepStarted'],
+        on: {
+            PREV: {
+                target: (final-1).toString(),
+                actions: ['onTransition']
+            }
+        },
+        meta: {
+            id: 'end'
+        }
+    };
+    return steps;
+}
+
+let context = mapProcessToContext(process);
+let steps = mapProcessToSteps(process);
+
+const stepMachine = Machine(
+    {
+        id: 'toggle',
+        initial: '1',
+        context: context,
+        states: steps
+    },
+    {
+        actions: {
+            onTransition: (context, event, meta) => {
+                console.log('changingState',`${meta.state.history.value}->${meta.state.value}`);
+            },
+            stepStarted: (context, event, current) => {
+                console.log('enteredState',current.state.value);
+                let currentStep = current.state.value;
+                context = Object.assign(context,{
+                    [currentStep]: {
+                        ...context[currentStep],
+                        started: Date.now()
+                    }
+                });
+            },
+            stepEnded: (context, event, current) => {
+                console.log('exitedState',current.state.history.value);
+                let prevStep = current.state.history.value;
+                context = Object.assign(context,{
+                    [prevStep]: {
+                        ...context[prevStep],
+                        completed: Date.now()
+                    }
+                });
+            },
+            updateContext: (context, event, current) => {
+                console.log('updatingContext',event,current.state.history.value);
+                let prevStep = current.state.history.value;
+                context = Object.assign(context,{
+                    [prevStep]: {
+                        ...context[prevStep],
+                        data: event.data
+                    }
+                });
+            }
+        },
+        activities: {
+            beeping: () => {
+                const interval = setInterval(() => console.log('BEEP!'), 1000);
+                return () => clearInterval(interval);
+            }
+        },
+        guards: {
+            schemaIsValid: context => context.valid,
+            schemaNotValid: context => !context.valid
+        },
+        services: {
+            validateData: (context,event) => {
+                console.log(context,event);
+                return new Promise((resolve, reject) => {
+                    schema
+                        .isValid(event.data)
+                        .then(function(valid) {
+                            setTimeout(()=>{
+                                if(valid) return resolve(event.data);
+                                return reject('Failed Validation');
+                            },1000)
+                        });
+                });
+            }
+        }
+    }
+);
+
+export const StepMachineComponent = () => {
+
+    const [loading, setLoading] = useState(false);
+
+    const [currentState, send] = useMachine(stepMachine);
+
+    let {value, context, matches, meta} = currentState;
+
+    let currentMeta = mergeMeta(meta);
+
+    const navigate = (step) => {
+        setLoading(true);
+        setTimeout(()=>{
+            send(step);
+            setLoading(false);
+        },200)
+    };
+
+    const printDebug = () => {
+        return (
+            <>
+                <pre>State: {value}</pre>
+                <pre>Context: {JSON.stringify(context)}</pre>
+                <pre>StateMeta: {JSON.stringify(currentMeta)}</pre>
+            </>
+        );
+    };
+
+    let isForm = false;
+    let config = null;
+
+    if ( context[value] && context[value].config ) {
+        isForm = true;
+        config = context[value].config
+    } else {
+        isForm = false;
+    }
+
+    console.log(context[value]);
+
+    return (
+        <div>
+            <h3>Welcome</h3>
+            <hr/>
+            {!loading&&isForm&&(
+                <FormStep config={config} onSubmit={send} data={context[value].data}/>
+            )}
+            <hr/>
+            <button onClick={() => navigate('PREV')}>PREV</button>
+            <button onClick={() => navigate('NEXT')}>NEXT</button>
+            {printDebug()}
+        </div>
+    );
+
+};
 
 /*
 * 1. Click Validate Action
@@ -29,7 +249,19 @@ const toggleMachine = Machine(
         id: 'toggle',
         initial: 'idle',
         context: {
-            details: {
+            user: {
+                started: null,
+                completed: null,
+                config: {
+                    schema: userSchema,
+                    options: userOptions,
+                },
+                data: null,
+                valid: false
+            },
+            card: {
+                started: null,
+                completed: null,
                 config: {
                     schema: userSchema,
                     options: userOptions,
@@ -118,11 +350,25 @@ const toggleMachine = Machine(
             onTransition: (context, event, meta) => {
                 console.log('changingState',`${meta.state.history.value}->${meta.state.value}`);
             },
-            stepStarted: (context, event, meta) => {
-                console.log('enteredState',meta.state.value)
+            stepStarted: (context, event, current) => {
+                console.log('enteredState',current.state.value);
+                let meta = mergeMeta(current.state.meta);
+                context = Object.assign(context,{
+                    [meta.id]: {
+                        ...context[meta.id],
+                        started: Date.now()
+                    }
+                });
             },
-            stepEnded: (context, event, meta) => {
-                console.log('exitedState',meta.state.history.value)
+            stepEnded: (context, event, current) => {
+                console.log('exitedState',current.state.history.value);
+                let meta = mergeMeta(current.state.history.meta);
+                context = Object.assign(context,{
+                    [meta.id]: {
+                        ...context[meta.id],
+                        completed: Date.now()
+                    }
+                });
             },
             updateContext: assign({
                 valid: true,
@@ -192,10 +438,22 @@ function mergeMeta(meta) {
 //     );
 // };
 
-class FormStem extends React.Component {
+class FormStep extends React.Component {
+    state = {
+        loading: false
+    };
+    submitForm = (payload) => {
+        this.setState({loading:true});
+        setTimeout(()=>{
+            this.props.onSubmit({type:'NEXT',data:payload});
+            this.setState({loading:false});
+        },200)
+    };
     render() {
         return(
-
+            <div style={{width: 450}}>
+                {this.state.loading?<div>Loading...</div>:<FormComponent config={this.props.config} submitForm={this.submitForm} initialData={this.props.data}/>}
+            </div>
         )
     }
 }
@@ -208,9 +466,7 @@ export const Toggler = () => {
 
     let currentMeta = mergeMeta(meta);
 
-    const [form, setValues] = useState({
-        name: ''
-    });
+    const [form, setValues] = useState(false);
 
     const printDebug = () => {
         return (
@@ -253,9 +509,7 @@ export const Toggler = () => {
         return (
             <div>
                 <h3>Invalid</h3>
-                <div style={{width: 450}}>
-                    <FormComponent config={config}/>
-                </div>
+                <FormStep config={config} onSubmit={send}/>
                 <input
                     value={form.name}
                     name="name"
@@ -283,8 +537,7 @@ export const Toggler = () => {
 function App() {
     return (
         <div className="App">
-            <Toggler/>
-
+            <StepMachineComponent/>
         </div>
     );
 }

@@ -1,0 +1,16 @@
+{
+  "errMessages": {
+    "card_number": {
+      "required": "Card Number Is Required"
+    },
+    "cc_exp_month": {
+      "required": "Expiration Month Is Required"
+    },
+    "cc_exp_year": {
+      "required": "Expiration Year Is Required"
+    },
+    "cc_code": {
+      "required": "Security Code Is Required"
+    }
+  }
+}

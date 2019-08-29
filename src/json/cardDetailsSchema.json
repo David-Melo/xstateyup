@@ -1,0 +1,47 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "object",
+  "title": "Credit Card Details",
+  "required": [
+    "card_number",
+    "cc_exp_month",
+    "cc_exp_year",
+    "cc_code"
+  ],
+  "properties": {
+    "card_number": {
+      "$id": "#/properties/card_number",
+      "type": "string",
+      "title": "Card Number",
+      "input":  "text",
+      "required": true,
+      "grid": 12
+    },
+    "cc_exp_month": {
+      "$id": "#/properties/cc_exp_month",
+      "type": "string",
+      "title": "Expiration Month",
+      "input":  "text",
+      "required":  true,
+      "grid": 4
+    },
+    "cc_exp_year": {
+      "$id": "#/properties/cc_exp_year",
+      "type": "string",
+      "title": "Expiration Year",
+      "input":  "text",
+      "required": true,
+      "grid": 4
+    },
+    "cc_code": {
+      "$id": "#/properties/cc_code",
+      "type": "string",
+      "title": "Security Code",
+      "input":  "text",
+      "required": true,
+      "grid": 4
+    }
+  }
+}

@@ -5,6 +5,9 @@ import { buildYup } from "json-schema-to-yup";
 import { Row, Col, Form, FormGroup, FormFeedback, Label, Input, Button, Alert} from "reactstrap";
 import Select from 'react-select';
 
+// https://jsonschema.net/
+//https://beta5.objgen.com/json/local/design
+
 class MultiSelect extends React.Component {
     id = 'values';
     constructor(props){
@@ -135,6 +138,9 @@ class FormComponent extends React.Component {
                 options: typeof i.options != 'undefined' && Array.isArray(i.options)  ? i.options : [],
             });
         });
+        if (this.props.initialData) {
+            this.values = this.props.initialData;
+        }
     }
     onSubmit = (values, {setSubmitting,resetForm}) => {
         this.setState({
@@ -142,42 +148,40 @@ class FormComponent extends React.Component {
             successMessage: null
         });
         let payload = {
-            data: {
-                ...values
-            }
+            ...values
         };
         _.each(this.config.schema.properties,function(i,k){
             switch (i.input) {
                 case 'multi-select':
-                    payload.data[k] = Array.isArray(values[k]) ? values[k].map(t => t.value).join('; ') : "";
+                    payload[k] = Array.isArray(values[k]) ? values[k].map(t => t.value).join('; ') : "";
                     break;
                 case 'checkbox':
-                    payload.data[k] = Array.isArray(values[k]) ? values[k].map(t => t).join('; ') : "";
+                    payload[k] = Array.isArray(values[k]) ? values[k].map(t => t).join('; ') : "";
                     break;
                 default:
                     break;
             }
         });
-        this.props.submitForm(payload)
-            .then(e => {
-                if (!e.success) {
-                    this.setState({
-                        errorMessage: e.message
-                    });
-                }
-                setSubmitting(false);
-                resetForm();
-                this.setState({
-                    successMessage: this.config.options.successMessage
-                });
-            })
-            .catch(e => {
-                console.log(e);
-                this.setState({
-                    errorMessage: e.message
-                });
-                setSubmitting(false);
-            });
+        this.props.submitForm(payload);
+            // .then(e => {
+            //     if (!e.success) {
+            //         this.setState({
+            //             errorMessage: e.message
+            //         });
+            //     }
+            //     setSubmitting(false);
+            //     resetForm();
+            //     this.setState({
+            //         successMessage: this.config.options.successMessage
+            //     });
+            // })
+            // .catch(e => {
+            //     console.log(e);
+            //     this.setState({
+            //         errorMessage: e.message
+            //     });
+            //     setSubmitting(false);
+            // });
     };
     render() {
         return (
