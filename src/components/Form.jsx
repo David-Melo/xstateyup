@@ -139,8 +139,12 @@ class FormComponent extends React.Component {
             });
         });
         if (this.props.initialData) {
-            this.values = this.props.initialData;
+            this.values = {
+                ...this.values,
+                ...this.props.initialData
+            };
         }
+        console.log(this.values)
     }
     onSubmit = (values, {setSubmitting,resetForm}) => {
         this.setState({

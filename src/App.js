@@ -20,7 +20,10 @@ const process = {
     user: {
         config: {
             schema: userSchema,
-            options: userOptions,
+            options: userOptions
+        },
+        data: {
+            first_name: 'David'
         }
     },
     card: {
@@ -38,7 +41,7 @@ function mapProcessToContext(process) {
         count++;
         context[count.toString()] = {
             ...p,
-            data: null,
+            data: p.data || null,
             valid: false
         };
     });
@@ -140,12 +143,15 @@ const stepMachine = Machine(
             updateContext: (context, event, current) => {
                 console.log('updatingContext',event,current.state.history.value);
                 let prevStep = current.state.history.value;
-                context = Object.assign(context,{
-                    [prevStep]: {
-                        ...context[prevStep],
-                        data: event.data
-                    }
-                });
+                console.log('--------->',context[prevStep],event.data)
+                if(event.data){
+                    context = Object.assign(context,{
+                        [prevStep]: {
+                            ...context[prevStep],
+                            data: event.data
+                        }
+                    });
+                }
             }
         },
         activities: {
