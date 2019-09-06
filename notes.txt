@@ -1,0 +1,195 @@
+Process
+    properties:
+        status todo | inprogress | complete
+        actor: (who)
+        startDate (when)
+        endData
+        dueDate
+    steps: (how)
+        status
+        actor
+        startdate
+        enddate
+        duedate
+        input schema
+        output data
+
+    decision:
+    inputs
+    outputs
+
+process 1 - refill gas tank
+- actor: user
+- object: car
+- inputs
+    gasoline
+    money
+- locations: gas station?
+
+1. park at pump
+2. turn off car
+3. walk to pump
+4. open tank
+5. insert card
+6. enter zipcode/pin
+7. pick up nozzle
+8. select gas type
+9. insert nozzle
+10. wait for full
+11. reset nozzle
+12. close tank
+13. get receipt
+14. get in car
+15. reset odomoter
+
+process 2 - get dressed
+- actor: user
+- object: user
+- inputs:
+    pants
+    shirt
+location: anywhere
+
+1. select underwear
+2. put on underwear
+3. select socks
+4. put on socks
+5. select pants
+6. put on pants
+8. select shirt
+7. put on deodorant
+8. put on shirt
+9. put on watch & ring & wallet
+10. check if glasses are clean
+    1. if dirty, clean
+        find cloth
+        lean glasses
+11. clean put on glasses
+12. put on shoes
+
+
+actor: person doing the process/task (who)
+object: the process/task is affecting (what)
+inputs: things needed to complete the process
+location: place where things need to happen
+when: requirements when a task needs to happen
+    conditional: when gas is low?
+    specific: scheduled for monday 10 am
+
+flow:
+    takes an object through a certain path towards its final goal
+    object to its destination
+
+User
+-----
+properties:
+    name
+    age
+
+relations
+    owns car
+    belongs to group
+
+actions
+    go to sleep
+    wake up
+    start walking
+    stop walking
+    start running
+    stop running
+    use car
+
+transitions:
+    idle -> sleeping (go to sleep)
+    sleeping -> idle (wake up)
+    idle -> walking (walk)
+    walking -> idle (stop walking)
+    idle -> running (start running)
+    running -> idle (stop running)
+    idle -> driving (use car)
+
+events:
+    went to sleep
+    woke up
+    started walking
+    stopped walking
+    started running
+    stopped running
+    used car
+
+states:
+    sleeping
+    idle
+    walking
+    running
+    driving (w car)
+
+Car Actions
+    turn on
+    accelerate
+    brake
+    turn of
+
+
+
+
+Car (needs a drive/user)
+------
+properties:
+    color:
+    gas:
+    health:
+
+transitions:
+    off -> on (turn on)
+    on -> accelerating -> coasting (accelerate)
+    accelerating -> breaking (brake)
+    coasting -> breaking (brake)
+    on -> off (turn off)
+
+states:
+    off
+    on
+    coasting
+    accelerating
+    breaking
+
+
+----
+
+goal: create an order
+input: list of products
+
+step 1: select product
+step 2: collect user information
+step 3: collect credit card information
+step 4: verify & charge card
+
+-----
+
+create object
+
+default properties
+createdAt
+updatedAt
+id
+
+define custom properties
+name
+email
+
+built in processes
+create
+update
+delete
+
+
+----
+
+what i need to create a user
+
+a section for users
+a button to initiate creation
+a form to input the data
+a button to save the data
+

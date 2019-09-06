@@ -40,12 +40,23 @@ function mapProcessToContext(process) {
     _.forEach(process,(p,k)=>{
         count++;
         context[count.toString()] = {
+            id: k,
             ...p,
             data: p.data || null,
             valid: false
         };
     });
     return context;
+}
+
+function extractDataFromContext(context) {
+    let data = {};
+    _.forEach(context,(c,k)=>{
+        if(c.data) {
+            data[c.id] = c.data;
+        }
+    });
+    return data;
 }
 
 function mapProcessToSteps(process) {
@@ -61,6 +72,7 @@ function mapProcessToSteps(process) {
                 },
             },
             meta: {
+                key: '1',
                 id: 'start'
             }
         }
@@ -84,13 +96,13 @@ function mapProcessToSteps(process) {
                 }
             },
             meta: {
+                key: current,
                 id: k
             }
         };
     });
     let final = count+1;
     steps[final.toString()] = {
-        type: 'final',
         entry: ['stepStarted'],
         on: {
             PREV: {
@@ -99,6 +111,7 @@ function mapProcessToSteps(process) {
             }
         },
         meta: {
+            key: final.toString(),
             id: 'end'
         }
     };
@@ -220,7 +233,7 @@ export const StepMachineComponent = () => {
         isForm = false;
     }
 
-    console.log(context[value]);
+    console.log(value);
 
     return (
         <div>
@@ -229,6 +242,7 @@ export const StepMachineComponent = () => {
             {!loading&&isForm&&(
                 <FormStep config={config} onSubmit={send} data={context[value].data}/>
             )}
+            {(currentMeta.id==='end'&&matches(currentMeta.key))&&(<pre>{JSON.stringify(extractDataFromContext(context))}</pre>)}
             <hr/>
             <button onClick={() => navigate('PREV')}>PREV</button>
             <button onClick={() => navigate('NEXT')}>NEXT</button>
